@@ -1,3 +1,6 @@
 [submodule "api_gateway"]
 	path = api_gateway
 	url = https://github.com/justinpakming/comp3122-ubeat-api-gateway.git
+[submodule "customer_order"]
+	path = customer_order
+	url = https://github.com/Him311/comp3122-ubeat-customer-order.git
