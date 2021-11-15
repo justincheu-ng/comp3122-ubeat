@@ -1,21 +1,82 @@
 version: "3.3"
 services:
   message_queue:
-     container_name: message_queue
-     image: redis
-     expose: 
-       - 6379
-
+    container_name: message_queue
+    image: redis
+    expose: 
+      - 6379
+  api_gateway:
+    container_name: api_gateway
+    build: ./api_gateway
+    volumes:
+      - ./api_gateway:/app
+    ports:
+      - 15000:15000
+    depends_on:
+      - user_db
+  user_db:
+    container_name: user_db
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: comp3122
+      MONGO_INITDB_ROOT_PASSWORD: 23456
+      MONGO_INITDB_DATABASE: admin
+    expose:
+      - 27017
+    volumes:
+      - ./api_gateway/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - user_db:/data/db
+  menu:
+    container_name: menu
+    build: ./menu
+    volumes:
+      - ./menu:/app
+    expose:
+      - 15000
+    depends_on:
+      - menu_db
+  menu_db:
+    container_name: menu_db
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: comp3122
+      MONGO_INITDB_ROOT_PASSWORD: 23456
+      MONGO_INITDB_DATABASE: admin
+    expose:
+      - 27017
+    volumes:
+      - ./menu/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - menu_db:/data/db
+  restaurant_order:
+    container_name: restaurant_order
+    build: ./restaurant_order
+    volumes:
+      - ./restaurant_order:/app
+    expose:
+      - 15000
+    depends_on:
+      - restaurant_order_db
+  restaurant_order_db:
+    container_name: restaurant_order_db
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: comp3122
+      MONGO_INITDB_ROOT_PASSWORD: 23456
+      MONGO_INITDB_DATABASE: admin
+    expose:
+      - 27017
+    volumes:
+      - ./restaurant_order/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - restaurant_order_db:/data/db
   customer_order:
-      container_name: customer_order
-      build: .
-      volumes:
-        - .:/app
-      ports:
-        - 15000:15000
-      depends_on:
-        - customer_order_db
-
+    container_name: customer_order
+    build: ./customer_order
+    volumes:
+      - ./customer_order:/app
+    expose:
+      - 15000
+    depends_on:
+      - customer_order_db
   customer_order_db:
     container_name: customer_order_db
     image: mongo
@@ -23,21 +84,73 @@ services:
       MONGO_INITDB_ROOT_USERNAME: comp3122
       MONGO_INITDB_ROOT_PASSWORD: 23456
       MONGO_INITDB_DATABASE: admin
-    ports:
-      - 27017:27017
+    expose:
+      - 27017
     volumes:
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./customer_order/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
       - customer_order_db:/data/db
 
-  customer_order_test:
-    container_name: customer_order_test
-    build: ./test
-    depends_on:
-      - customer_order
-      - customer_order_db
+  delivery_order:
+    container_name: delivery_order
+    build: ./delivery_order
     volumes:
-      - ./test:/app
+      - ./delivery_order:/app
+    expose:
+      - 15000
+    depends_on:
+      - delivery_order_db
+
+  delivery_order_db:
+    container_name: delivery_order_db
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: comp3122
+      MONGO_INITDB_ROOT_PASSWORD: 23456
+      MONGO_INITDB_DATABASE: admin
+    expose:
+      - 27017
+    volumes:
+      - ./delivery_order/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - delivery_order_db:/data/db
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yaml:/etc/prometheus/alert_rules.yaml
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - "./grafana/grafana.ini:/etc/grafana/grafana.ini"
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./grafana:/var/lib/grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      -  prometheus
+
+  alertmanager:
+     image: prom/alertmanager
+     ports:
+       - 9093:9093
+     volumes:
+       - ./prometheus/alertmanager.yaml/:/etc/alertmanager/alertmanager.yaml
+     restart: always
+     command:
+       - '--config.file=/etc/alertmanager/alertmanager.yaml'
+       - '--storage.path=/alertmanager'
 
 volumes:
+  user_db:
+    name: user_db
+  menu_db:
+    name: menu_db
+  restaurant_order_db:
+    name: restaurant_order_db
   customer_order_db:
     name: customer_order_db
+  delivery_order_db:
+    name: delivery_order_db
