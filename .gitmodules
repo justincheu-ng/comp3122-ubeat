@@ -4,3 +4,6 @@
 [submodule "customer_order"]
 	path = customer_order
 	url = https://github.com/Him311/comp3122-ubeat-customer-order.git
+[submodule "delivery_order"]
+	path = delivery_order
+	url = https://github.com/tung9898/comp3122-ubeat-delivery.git
