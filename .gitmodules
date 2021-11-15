@@ -1,0 +1,3 @@
+[submodule "api_gateway"]
+	path = api_gateway
+	url = https://github.com/justinpakming/comp3122-ubeat-api-gateway.git
