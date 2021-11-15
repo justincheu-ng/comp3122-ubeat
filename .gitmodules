@@ -7,3 +7,6 @@
 [submodule "delivery_order"]
 	path = delivery_order
 	url = https://github.com/tung9898/comp3122-ubeat-delivery.git
+[submodule "restaurant_order"]
+	path = restaurant_order
+	url = https://github.com/chlhugo01/comp3122-ubeat-restaurant
