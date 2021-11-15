@@ -13,3 +13,6 @@
 [submodule "menu"]
 	path = menu
 	url = https://github.com/chlhugo01/comp3122-ubeat-menu
+[submodule "grafana"]
+	path = grafana
+	url = https://github.com/chlhugo01/comp3122-ubeat-grafana
